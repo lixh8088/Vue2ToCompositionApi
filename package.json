@@ -1,0 +1,72 @@
+{
+  "name": "vue3tocompositionapi",
+  "displayName": "Vue3ToCompositionApi",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "1.91.1"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vue3tocompositionapi.helloWorld",
+        "title": "Hello World"
+      },
+      {
+        "command": "vue3tocompositionapi.transform",
+        "title": "vue3ToCompositionApi"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "vue3tocompositionapi.transform",
+          "group": "group2"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "vue3tocompositionapi.transform",
+          "group": "group2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/js-beautify": "^1.14.3",
+    "@types/mocha": "^10.0.7",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.92.0",
+    "@types/webpack-env": "^1.18.5",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.11.0",
+    "@vscode/test-cli": "^0.0.9",
+    "@vscode/test-electron": "^2.4.0",
+    "eslint": "^8.57.0",
+    "gogocode": "^1.0.48",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.4.5",
+    "webpack": "^5.92.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "core-js": "^3.37.1",
+    "js-beautify": "^1.15.1"
+  }
+}
