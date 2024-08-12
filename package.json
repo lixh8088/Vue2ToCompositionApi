@@ -3,6 +3,7 @@
   "displayName": "Vue3ToCompositionApi",
   "description": "",
   "version": "0.0.1",
+  "icon": "images/icon.png",
   "engines": {
     "vscode": "1.92.1"
   },

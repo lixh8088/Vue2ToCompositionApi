@@ -601,9 +601,10 @@ function setContentMethods() {
         }
       }
       Object.keys(importComponents).forEach(key => {
-          componentsValue.push(`const ${key} = defineComponent(() => import('${importComponents[key]}'))`)
-          delete importComponents[key]
-          addImport('vue', 'defineComponent')
+        if (['Vue'].includes(key)) return
+        componentsValue.push(`const ${key} = defineComponent(() => import('${importComponents[key]}'))`)
+        delete importComponents[key]
+        addImport('vue', 'defineComponent')
       })
 
       if (componentsValue.length > 0) {
