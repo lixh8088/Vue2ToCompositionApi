@@ -1,4 +1,11 @@
+/*
+ * @Name:
+ * @Description:
+ * @Author: lixiaohan
+ * @Date: 2024-08-08 14:29:08
+ */
 import fs from 'fs'
+// import * as vscode from 'vscode'
 // 获取script节点
 export function getScriptAst(ast: any) {
   return ast && ast.parseOptions && ast.parseOptions.language === 'vue'
@@ -15,7 +22,11 @@ export function readFile(filePath: string) {
   const stats = fs.lstatSync(filePath)
   if (+stats.isFile()) {
     const outputPath = setOutputFilePath(filePath)
-    if (outputPath !== filePath) return {filePath, outputPath}
+    // if (outputPath === filePath) {
+    //   vscode.window.showWarningMessage('已转换文件不可再次转换！')
+    //   return
+    // }
+    return {filePath, outputPath}
   } else if (+stats.isDirectory()){
     fs.readdir(filePath, (_err: any, data: any) => {
       data.forEach((file: any) => {

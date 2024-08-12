@@ -3,14 +3,13 @@
 * e-mail: diquick@qq.com
 * author: wd3322
 */
-import jsBeautify from 'js-beautify'
-import { jsBeautifyOptions } from './const/index'
-import { braceRegExp, parenthesisRegExp, mixinsRegExp } from './const/regExp'
-import * as vscode from 'vscode'
+// import jsBeautify from 'js-beautify'
+// import { jsBeautifyOptions } from '../const/index'
+import { braceRegExp, parenthesisRegExp, mixinsRegExp } from '../const/regExp'
 function beautifyContent(entryScriptContent: string) {
-  const beautifyScriptContent = jsBeautify(entryScriptContent, jsBeautifyOptions)
+  // const beautifyScriptContent = jsBeautify(entryScriptContent, jsBeautifyOptions)
   return (function() {
-    return beautifyScriptContent
+    return entryScriptContent
       .match(braceRegExp)?.[0]
       .replace(mixinsRegExp, '')
   })()
@@ -292,17 +291,7 @@ enum Type {
   route='route',
   store='store'
 }
-enum Hooks {
-  beforeMount = 'beforeMount',
-  mounted = 'mounted',
-  beforeUpdate = 'beforeUpdate',
-  updated = 'updated',
-  beforeDestroy = 'beforeDestroy',
-  destroyed = 'destroyed',
-  activated = 'activated',
-  deactivated = 'deactivated',
-  errorCaptured = 'errorCaptured'
-}
+
 function addUse(type: Type) {
 
   if (['data', 'vm', 'attrs', 'slots', 'router', 'route', 'store'].includes(type)) {
@@ -360,14 +349,18 @@ function setContentMethods() {
                   addImport('vue', 'reactive')
                 } else if (value === null) {
                   dataValues.push(`const ${key} = reactive(null)`)
+                  addImport('vue', 'reactive')
                 } else if (!Object.keys(value).length) {
                   dataValues.push(`const ${key} = reactive({})`)
+                  addImport('vue', 'reactive')
                 } else {
                   dataValues.push(`const ${key} = reactive(${value})`)
+                  addImport('vue', 'reactive')
                 }
                 break;
               default:
                 dataValues.push(`const ${key} = ref(${value})`)
+                addImport('vue', 'ref')
                 break;
           }
         }
@@ -697,9 +690,7 @@ export default function Vue2ToCompositionApi(entryScriptContent= '', originImpor
     if (!modelScriptContent) {
       throw new Error(`Vue2ToCompositionApi entry script content not a valid content`)
     }
-    console.log(666)
     eval(`vmBody = ${modelScriptContent}`)
-    console.log(777)
     // vm content init
     global.vmContent = {
       props: getPrototype(vmBody.props) === 'object' ? vmBody.props : {},
@@ -757,8 +748,8 @@ export default function Vue2ToCompositionApi(entryScriptContent= '', originImpor
     setContentMethods()
 
     // output script content beautify
-    return jsBeautify(outputScriptContent, jsBeautifyOptions)
-
+    // return jsBeautify(outputScriptContent, jsBeautifyOptions)
+    return outputScriptContent
   } catch (err) {
     console.log(888, err)
     // throw new Error(err)

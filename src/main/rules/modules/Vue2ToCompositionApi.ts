@@ -4,7 +4,7 @@
  * @Author: lixiaohan
  * @Date: 2024-08-08 14:29:08
  */
- import Vue2ToCompositionApi from '../../Vue2ToCompositionApi'
+ import Vue2ToCompositionApi from '../../utils/Vue2ToCompositionApi'
  import { getScriptAst } from '../../utils/scriptUtils'
 export default function (ast: any) {
   const scriptAst = getScriptAst(ast)
@@ -20,9 +20,7 @@ export default function (ast: any) {
     .each((item: { match: any[][]; remove: () => void }) => {
       const name: string = item.match[2][0].value
       const content = item.match[0] ? item.match[0][0].value : Array.from(new Set(item.match[1].map(item => item.value)))
-      importContent[name] = {
-        content
-      }
+      if (!['vue'].includes(name))importContent[name] = { content }
       item.remove()
     })
   })
