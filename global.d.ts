@@ -11,5 +11,7 @@ declare global {
   var outputScriptContent: any
   var originImportContent: any
   var vmBody: any
+  var beforeRouteEnterContent: string
+  var importComponents: any
 }
 export {}

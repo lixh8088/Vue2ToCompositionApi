@@ -589,8 +589,8 @@ function setContentMethods() {
       }
     },
     components() {
+      const componentsValue = []
       if (vmKeys.components.length > 0) {
-        const componentsValue = []
         for (const prop in vmContent.components) {
           const componentContent = vmContent.components[prop]
           // 异步组件
@@ -598,18 +598,16 @@ function setContentMethods() {
             componentsValue.push(`const ${prop} = defineAsyncComponent(${componentContent})`)
             addImport('vue', 'defineAsyncComponent')
           }
-          Object.keys(originImportContent).forEach(key => {
-            if (originImportContent[key].type === 'defineComponent') {
-              componentsValue.push(`const ${key} = defineComponent(() => import('${originImportContent[key].content}'))`)
-              delete originImportContent[key]
-              addImport('vue', 'defineComponent')
-            }
-          })
         }
+      }
+      Object.keys(importComponents).forEach(key => {
+          componentsValue.push(`const ${key} = defineComponent(() => import('${importComponents[key]}'))`)
+          delete importComponents[key]
+          addImport('vue', 'defineComponent')
+      })
 
-        if (componentsValue.length > 0) {
-          vmOutput.components = componentsValue.join('\n\n')
-        }
+      if (componentsValue.length > 0) {
+        vmOutput.components = componentsValue.join('\n\n')
       }
     },
     import() {
@@ -679,8 +677,9 @@ function setContentMethods() {
 
 global.vmBody = null
 global.outputScriptContent = ''
-export default function Vue2ToCompositionApi(entryScriptContent= '', originImportContent = {}) {
-  global.originImportContent = originImportContent
+export default function Vue2ToCompositionApi(entryScriptContent= '', { importContent = {}, importComponents = {} }) {
+  global.originImportContent = importContent
+  global.importComponents = importComponents
   if (getPrototype(entryScriptContent) !== 'string') {
     throw new Error(`Vue2ToCompositionApi ${entryScriptContent} is not a string`)
   }
@@ -732,6 +731,7 @@ export default function Vue2ToCompositionApi(entryScriptContent= '', originImpor
     // vm output init
     global.vmOutput = {
       import: '',
+      components: '',
       use: '',
       props: '',
       emits: '',
@@ -741,17 +741,13 @@ export default function Vue2ToCompositionApi(entryScriptContent= '', originImpor
       watch: '',
       hooks: '',
       methods: '',
-      filters: '',
-      components: ''
+      filters: ''
     }
 
     setContentMethods()
 
-    // output script content beautify
-    // return jsBeautify(outputScriptContent, jsBeautifyOptions)
     return outputScriptContent
   } catch (err) {
     console.log(888, err)
-    // throw new Error(err)
   }
 }
