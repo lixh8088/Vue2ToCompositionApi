@@ -53,14 +53,13 @@ export default function (ast: any) {
     const newContent = Vue2ToCompositionApi(exportDefaultStr, { importContent, importComponents })
     getScriptAst(ast)
     .replace('export default {}', `\n${newContent}\n`)
-    if (beforeRouteEnterContent) {
-      getScriptAst(ast).before(beforeRouteEnterContent)
-      beforeRouteEnterContent = ''
+    if (global.beforeRouteEnterContent) {
+      getScriptAst(ast).before(global.beforeRouteEnterContent)
+      global.beforeRouteEnterContent = ''
     }
 
     // 添加setup属性
     ast.node.script.attrs.setup = true
-    console.log('document-----', document)
   } catch (error) {
     console.log('Vue2ToCompositionApi----', error)
   }

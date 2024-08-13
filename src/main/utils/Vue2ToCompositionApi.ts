@@ -3,11 +3,10 @@
 * e-mail: diquick@qq.com
 * author: wd3322
 */
-// import jsBeautify from 'js-beautify'
-// import { jsBeautifyOptions } from '../const/index'
+import * as vscode from "vscode"
 import { braceRegExp, parenthesisRegExp, mixinsRegExp } from '../const/regExp'
 function beautifyContent(entryScriptContent: string) {
-  // const beautifyScriptContent = jsBeautify(entryScriptContent, jsBeautifyOptions)
+
   return (function() {
     return entryScriptContent
       .match(braceRegExp)?.[0]
@@ -769,5 +768,6 @@ export default function Vue2ToCompositionApi(entryScriptContent= '', { importCon
     return outputScriptContent
   } catch (err) {
     console.log(888, err)
+    vscode.window.showErrorMessage('转换失败：' + err)
   }
 }

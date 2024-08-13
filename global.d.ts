@@ -14,5 +14,6 @@ declare global {
   var beforeRouteEnterContent: string
   var importComponents: any
   var document: Document
+  var Vue: any
 }
 export {}

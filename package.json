@@ -15,10 +15,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "vue3tocompositionapi.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "vue3tocompositionapi.transform",
         "title": "vue3ToCompositionApi"
       }
@@ -26,12 +22,14 @@
     "menus": {
       "explorer/context": [
         {
+          "when": "resourceLangId == vue",
           "command": "vue3tocompositionapi.transform",
           "group": "group2"
         }
       ],
       "editor/context": [
         {
+          "when": "resourceLangId == vue",
           "command": "vue3tocompositionapi.transform",
           "group": "group2"
         }
