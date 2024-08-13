@@ -46,7 +46,7 @@ const transform = function (fileInfo: any, api: any, options: any) {
 				reject(err)
 			}
 			resolve(outputPath)
-			vscode.window.showInformationMessage('The file was saved!');
+			vscode.window.showInformationMessage('转换成功');
 		});
 	});
 })

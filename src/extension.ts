@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('vue3tocompositionapi.transform', async(uri) => {
 			try {
-        const outputPath = await run(path.resolve(__dirname, uri.fsPath))
+        await run(path.resolve(__dirname, uri.fsPath))
         vscode.commands.executeCommand('workbench.files.action.compareFileWith')
       } catch (error) {
       }

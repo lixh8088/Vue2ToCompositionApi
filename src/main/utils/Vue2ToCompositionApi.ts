@@ -764,10 +764,9 @@ export default function Vue2ToCompositionApi(entryScriptContent= '', { importCon
     }
 
     setContentMethods()
-
     return outputScriptContent
   } catch (err) {
     console.log(888, err)
-    vscode.window.showErrorMessage('转换失败：' + err)
+    vscode.window.showErrorMessage('Script转换失败：' + err)
   }
 }
