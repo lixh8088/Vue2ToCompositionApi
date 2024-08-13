@@ -17,15 +17,19 @@ function beautifyContent(entryScriptContent: string) {
 
 // 转换生命周期函数
 function setLifeHooks() {
-  for (const hook in vmBody) {
-    if (
-      ['beforeCreate', 'created', 'beforeMount', 'mounted',
-        'beforeUpdate', 'updated', 'beforeDestroy', 'destroyed',
-        'activated', 'deactivated', 'errorCaptured'].includes(hook) &&
-      getPrototype(vmBody[hook]).indexOf('function') !== -1
-    ) {
-      vmContent.hooks[hook] = vmBody[hook]
+  try {
+    for (const hook in vmBody) {
+      if (
+        ['beforeCreate', 'created', 'beforeMount', 'mounted',
+          'beforeUpdate', 'updated', 'beforeDestroy', 'destroyed',
+          'activated', 'deactivated', 'errorCaptured'].includes(hook) &&
+        getPrototype(vmBody[hook]).indexOf('function') !== -1
+      ) {
+        vmContent.hooks[hook] = vmBody[hook]
+      }
     }
+  } catch (error) {
+    console.log('setLifeHooks', error)
   }
 }
 
@@ -44,166 +48,176 @@ function addImport(type: string, value: string) {
 
 function replaceValue(value: string, dataKeyToUseData = false) {
   let result = ''
-  const thisKeyRegExp = /this(\.{1})([$a-zA-Z0-9_]+)/g
-  const refKeyRegExp = /\$REFS_KEY(\.|\?\.)([$a-zA-Z0-9_]+)/g
-  result = value
-    .replace(thisKeyRegExp, function(
-      str,
-      separator,
-      key,
-      index,
-      content
-    ) {
-      // props key
-      if (vmKeys.props.includes(key)) {
-        return 'props.' + key
-      }
-      // computed key
-      else if (vmKeys.computed.includes(key)) {
-        return key + '.value'
-      }
-      // methods key
-      else if (vmKeys.methods.includes(key)) {
-        return key
-      }
-      // data key
-      else if (vmKeys.data.includes(key) && !dataKeyToUseData) {
-        if (typeof vmContent.data[key] === 'object') {
-          return key
-        } else {
+  try {
+    
+    const thisKeyRegExp = /this(\.{1})([$a-zA-Z0-9_]+)/g
+    const refKeyRegExp = /\$REFS_KEY(\.|\?\.)([$a-zA-Z0-9_]+)/g
+    result = value
+      .replace(thisKeyRegExp, function(
+        str,
+        separator,
+        key,
+        index,
+        content
+      ) {
+        // props key
+        if (vmKeys.props.includes(key)) {
+          return 'props.' + key
+        }
+        // computed key
+        else if (vmKeys.computed.includes(key)) {
           return key + '.value'
         }
-      }
-      // useData key
-      else if (vmKeys.data.includes(key) && dataKeyToUseData) {
-        addUse(Type.data)
-        return 'useData().' + key
-      }
-      // attrs key
-      else if (key === '$attrs') {
-        addImport('vue', 'useAttrs')
-        addUse(Type.attrs)
-        return key.substring(1)
-      }
-      // slots key
-      else if (key === '$slots') {
-        addImport('vue', 'useSlots')
-        addUse(Type.slots)
-        return key.substring(1)
-      }
-      // router key
-      else if (key === '$router') {
-        addImport('vue-router', 'useRouter')
-        addUse(Type.router)
-        return key.substring(1)
-      }
-      // route key
-      else if (key === '$route') {
-        addImport('vue-router', 'useRoute')
-        addUse(Type.route)
-        return key.substring(1)
-      }
-      // store key
-      else if (key === '$store') {
-        addImport('vuex', 'useStore')
-        addUse(Type.store)
-        return key.substring(1)
-      }
-      // nextTick key
-      else if (key === '$nextTick') {
-        addImport('vue', 'nextTick')
-        return key.substring(1)
-      }
-      // set key
-      else if (key === '$set') {
-        addImport('vue', 'set')
-        return key.substring(1)
-      }
-      // delete key
-      else if (key === '$delete') {
-        addImport('vue', 'del')
-        return key.substring(1)
-      }
-      // emit key
-      else if (key === '$emit') {
-        const nameRegExp = /^\([\'\"\`](update:){0,1}([$a-zA-Z0-9_-]+)[\'\"\`]/
-        const name = content.substring(index + str.length).match(nameRegExp)?.[2] || ''
-        if (name) {
-          !vmContent.emits.includes(name) && vmContent.emits.push(name)
+        // methods key
+        else if (vmKeys.methods.includes(key)) {
+          return key
         }
-        return name
-          ? key.substring(1)
-          : `/* Warn: Cannot find emit name */ $vm.$emit`
-      }
-      // refs key
-      else if (key === '$refs') {
-        const nameRegExp = /(^\.|^\?\.)([$a-zA-Z0-9_]+)/
-        const name = content.substring(index + str.length).match(nameRegExp)?.[2] || ''
-        if (name) {
-          !vmContent.refs.includes(name) && vmContent.refs.push(name)
+        // data key
+        else if (vmKeys.data.includes(key) && !dataKeyToUseData) {
+          if (typeof vmContent.data[key] === 'object') {
+            return key
+          } else {
+            return key + '.value'
+          }
         }
-        return name
-          ? '$REFS_KEY'
-          : `/* Warn: Cannot find refs name */ $vm.$refs`
-      }
-      // other key
-      else if (
-        ['$data', '$props', '$el', '$options', '$parent', '$root', '$children', '$isServer',
-          '$listeners', '$watch', '$on', '$once', '$off', '$mount', '$forceUpdate', '$destroy'].includes(key)
+        // useData key
+        else if (vmKeys.data.includes(key) && dataKeyToUseData) {
+          addUse(Type.data)
+          return 'useData().' + key
+        }
+        // attrs key
+        else if (key === '$attrs') {
+          addImport('vue', 'useAttrs')
+          addUse(Type.attrs)
+          return key.substring(1)
+        }
+        // slots key
+        else if (key === '$slots') {
+          addImport('vue', 'useSlots')
+          addUse(Type.slots)
+          return key.substring(1)
+        }
+        // router key
+        else if (key === '$router') {
+          addImport('vue-router', 'useRouter')
+          addUse(Type.router)
+          return key.substring(1)
+        }
+        // route key
+        else if (key === '$route') {
+          addImport('vue-router', 'useRoute')
+          addUse(Type.route)
+          return key.substring(1)
+        }
+        // store key
+        else if (key === '$store') {
+          addImport('vuex', 'useStore')
+          addUse(Type.store)
+          return key.substring(1)
+        }
+        // nextTick key
+        else if (key === '$nextTick') {
+          addImport('vue', 'nextTick')
+          return key.substring(1)
+        }
+        // set key
+        else if (key === '$set') {
+          addImport('vue', 'set')
+          return key.substring(1)
+        }
+        // delete key
+        else if (key === '$delete') {
+          addImport('vue', 'del')
+          return key.substring(1)
+        }
+        // emit key
+        else if (key === '$emit') {
+          const nameRegExp = /^\([\'\"\`](update:){0,1}([$a-zA-Z0-9_-]+)[\'\"\`]/
+          const name = content.substring(index + str.length).match(nameRegExp)?.[2] || ''
+          if (name) {
+            !vmContent.emits.includes(name) && vmContent.emits.push(name)
+          }
+          return name
+            ? key.substring(1)
+            : `/* Warn: Cannot find emit name */ $vm.$emit`
+        }
+        // refs key
+        else if (key === '$refs') {
+          const nameRegExp = /(^\.|^\?\.)([$a-zA-Z0-9_]+)/
+          const name = content.substring(index + str.length).match(nameRegExp)?.[2] || ''
+          if (name) {
+            !vmContent.refs.includes(name) && vmContent.refs.push(name)
+          }
+          return name
+            ? '$REFS_KEY'
+            : `/* Warn: Cannot find refs name */ $vm.$refs`
+        }
+        // other key
+        else if (
+          ['$data', '$props', '$el', '$options', '$parent', '$root', '$children', '$isServer',
+            '$listeners', '$watch', '$on', '$once', '$off', '$mount', '$forceUpdate', '$destroy'].includes(key)
+        ) {
+          return '/* Warn: Unknown source: ${key} */$vm.' + key
+        }
+        // unknown key
+        else if (key) {
+          return `/* Warn: Unknown source: ${key} */$vm.${key}`
+        }
+        // nonexistent key
+        else {
+          return `/* Warn: Unknown source: ${key} */ $vm${separator}`
+        }
+      })
+      .replace(refKeyRegExp, function(
+        str,
+        separator,
+        name
       ) {
-        return '/* Warn: Unknown source: ${key} */$vm.' + key
-      }
-      // unknown key
-      else if (key) {
-        return `/* Warn: Unknown source: ${key} */$vm.${key}`
-      }
-      // nonexistent key
-      else {
-        return `/* Warn: Unknown source: ${key} */ $vm${separator}`
-      }
-    })
-    .replace(refKeyRegExp, function(
-      str,
-      separator,
-      name
-    ) {
-      // reset refs key
-      return name + '.value'
-    })
+        // reset refs key
+        return name + '.value'
+      })
+  } catch (error) {
+    console.log('replaceValue', error)
+  }
   return result
 }
 
 function replaceKey(key: string, dataKeyToUseData = false){
   let result = ''
-  // props key
-  if (vmKeys.props.includes(key)) {
-    result = 'props.' + key
-  }
-  // computed key
-  else if (vmKeys.computed.includes(key)) {
-    result = key + '.value'
-  }
-  // methods key
-  else if (vmKeys.methods.includes(key)) {
-    result = key
-  }
-  // data key
-  else if (vmKeys.data.includes(key) && !dataKeyToUseData) {
-    if (typeof vmContent.data[key] === 'object') {
-      result = key
-    } else {
+  try {
+    // props key
+    if (vmKeys.props.includes(key)) {
+      result = 'props.' + key
+    }
+    // computed key
+    else if (vmKeys.computed.includes(key)) {
       result = key + '.value'
     }
+    // methods key
+    else if (vmKeys.methods.includes(key)) {
+      result = key
+    }
+    // data key
+    else if (vmKeys.data.includes(key) && !dataKeyToUseData) {
+      if (typeof vmContent.data[key] === 'object') {
+        result = key
+      } else {
+        result = key + '.value'
+      }
+    }
+    // useData key
+    else if (vmKeys.data.includes(key) && dataKeyToUseData) {
+      addUse(Type.data)
+      result = 'useData().' + key
+    }
+    // unknown key
+    else if (key) {
+      result = `/* Warn: Unknown source: ${key} */ $vm.${key}`
+    }
+  } catch (error) {
+    console.log('replaceKey', error)
   }
-  // useData key
-  else if (vmKeys.data.includes(key) && dataKeyToUseData) {
-    addUse(Type.data)
-    result = 'useData().' + key
-  }
-  // unknown key
-  else if (key) {
-    result = `/* Warn: Unknown source: ${key} */ $vm.${key}`
-  }
+  
   return result
 }
 function getContentStr(
@@ -212,70 +226,75 @@ function getContentStr(
   resultCallbackContent: any = {}
 ) {
   let result = ''
-  // string prototype
-  if (getPrototype(value) === 'string') {
-    result = `\'${value}\'`
-    if (resultCallbackContent.string) {
-      result = resultCallbackContent.string({ value, result })
-    }
-  }
-  // object prototype
-  else if (getPrototype(value) === 'object') {
-    const values = []
-    for (const prop in value) {
-      const content = getContentStr(value[prop], replaceDataKeyToUseData, resultCallbackContent)
-      values.push(`${prop}: ${content}`)
-    }
-    result = values.length > 0 ? `{\n${values.join(',\n')}\n}` : '{}'
-    if (resultCallbackContent.object) {
-      result = resultCallbackContent.object({ value, values, result }) || result
-    }
-  }
-  // array prototype
-  else if (getPrototype(value) === 'array') {
-    const values = []
-    for (const item of value) {
-      const content = getContentStr(item, replaceDataKeyToUseData, resultCallbackContent)
-      values.push(content)
-    }
-    result = values.length > 0 ? `[${values.join(', ')}]` : '[]'
-    if (resultCallbackContent.array) {
-      result = resultCallbackContent.array({ value, values, result }) || result
-    }
-  }
-  // function prototype
-  else if (getPrototype(value).indexOf('function') !== -1) {
-    let content = value.toString()
-    // native code
-    if (
-      ['String', 'Number', 'Boolean', 'Array', 'Object', 'Date', 'Function', 'Symbol'].includes(value.name) &&
-      content.match(braceRegExp)?.[0] === '{ [native code] }'
-    ) {
-      result = `${value.name}`
-      if (resultCallbackContent.function) {
-        result = resultCallbackContent.function({ type: 'native', value, content, result }) || result
+  try {
+    // string prototype
+    if (getPrototype(value) === 'string') {
+      result = `\'${value}\'`
+      if (resultCallbackContent.string) {
+        result = resultCallbackContent.string({ value, result })
       }
     }
-    // custom code
+    // object prototype
+    else if (getPrototype(value) === 'object') {
+      const values = []
+      for (const prop in value) {
+        const content = getContentStr(value[prop], replaceDataKeyToUseData, resultCallbackContent)
+        values.push(`${prop}: ${content}`)
+      }
+      result = values.length > 0 ? `{\n${values.join(',\n')}\n}` : '{}'
+      if (resultCallbackContent.object) {
+        result = resultCallbackContent.object({ value, values, result }) || result
+      }
+    }
+    // array prototype
+    else if (getPrototype(value) === 'array') {
+      const values = []
+      for (const item of value) {
+        const content = getContentStr(item, replaceDataKeyToUseData, resultCallbackContent)
+        values.push(content)
+      }
+      result = values.length > 0 ? `[${values.join(', ')}]` : '[]'
+      if (resultCallbackContent.array) {
+        result = resultCallbackContent.array({ value, values, result }) || result
+      }
+    }
+    // function prototype
+    else if (getPrototype(value).indexOf('function') !== -1) {
+      let content = value.toString()
+      // native code
+      if (
+        ['String', 'Number', 'Boolean', 'Array', 'Object', 'Date', 'Function', 'Symbol'].includes(value.name) &&
+        content.match(braceRegExp)?.[0] === '{ [native code] }'
+      ) {
+        result = `${value.name}`
+        if (resultCallbackContent.function) {
+          result = resultCallbackContent.function({ type: 'native', value, content, result }) || result
+        }
+      }
+      // custom code
+      else {
+        content = replaceValue(content, replaceDataKeyToUseData)
+        const arg = content.match(parenthesisRegExp)?.[0] || '()'
+        const body = content.substring(content.indexOf(arg) + arg.length).match(braceRegExp)?.[0] || '{}'
+        result = value.constructor.name === 'AsyncFunction'
+          ? `async ${arg} => ${body}`
+          : `${arg} => ${body}`
+        if (resultCallbackContent.function) {
+          result = resultCallbackContent.function({ type: 'custom', value, content, arg, body, result }) || result
+        }
+      }
+    }
+    // other prototype
     else {
-      content = replaceValue(content, replaceDataKeyToUseData)
-      const arg = content.match(parenthesisRegExp)?.[0] || '()'
-      const body = content.substring(content.indexOf(arg) + arg.length).match(braceRegExp)?.[0] || '{}'
-      result = value.constructor.name === 'AsyncFunction'
-        ? `async ${arg} => ${body}`
-        : `${arg} => ${body}`
-      if (resultCallbackContent.function) {
-        result = resultCallbackContent.function({ type: 'custom', value, content, arg, body, result }) || result
+      result = `${value}`
+      if (resultCallbackContent.other) {
+        result = resultCallbackContent.other({ value, result }) || result
       }
     }
+  } catch (error) {
+    console.log('getContentStr', error)
   }
-  // other prototype
-  else {
-    result = `${value}`
-    if (resultCallbackContent.other) {
-      result = resultCallbackContent.other({ value, result }) || result
-    }
-  }
+  
   return result
 }
 
@@ -293,20 +312,23 @@ enum Type {
 }
 
 function addUse(type: Type) {
-
-  if (['data', 'vm', 'attrs', 'slots', 'router', 'route', 'store'].includes(type)) {
-    const contentDist = {
-      data: 'const useData = () => data',
-      attrs: 'const attrs = useAttrs()',
-      slots: 'const slots = useSlots()',
-      router: 'const router = useRouter()',
-      route: 'const route = useRoute()',
-      store: 'const store = useStore()'
+  try {
+    if (['data', 'vm', 'attrs', 'slots', 'router', 'route', 'store'].includes(type)) {
+      const contentDist = {
+        data: 'const useData = () => data',
+        attrs: 'const attrs = useAttrs()',
+        slots: 'const slots = useSlots()',
+        router: 'const router = useRouter()',
+        route: 'const route = useRoute()',
+        store: 'const store = useStore()'
+      }
+      const useContent = contentDist[type]
+      if (useContent) {
+        vmContent.use[type] = useContent
+      }
     }
-    const useContent = contentDist[type]
-    if (useContent) {
-      vmContent.use[type] = useContent
-    }
+  } catch (error) {
+    console.log('addUse', error)
   }
 }
 
@@ -346,17 +368,14 @@ function setContentMethods() {
               case 'object':
                 if (Array.isArray(value)) {
                   dataValues.push(`const ${key} = reactive(${value.length ? value : '[]'})`)
-                  addImport('vue', 'reactive')
                 } else if (value === null) {
                   dataValues.push(`const ${key} = reactive(null)`)
-                  addImport('vue', 'reactive')
                 } else if (!Object.keys(value).length) {
                   dataValues.push(`const ${key} = reactive({})`)
-                  addImport('vue', 'reactive')
                 } else {
-                  dataValues.push(`const ${key} = reactive(${value})`)
-                  addImport('vue', 'reactive')
+                  dataValues.push(`const ${key} = reactive(${JSON.stringify(value)})`)
                 }
+                addImport('vue', 'reactive')
                 break;
               default:
                 dataValues.push(`const ${key} = ref(${value})`)

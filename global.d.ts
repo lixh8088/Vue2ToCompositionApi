@@ -13,5 +13,6 @@ declare global {
   var vmBody: any
   var beforeRouteEnterContent: string
   var importComponents: any
+  var document: Document
 }
 export {}

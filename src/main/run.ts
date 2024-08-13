@@ -1,21 +1,19 @@
-/*
- * @Name:
- * @Description:
- * @Author: lixiaohan
- * @Date: 2024-08-08 14:43:28
- */
 import $ from 'gogocode'
 import fs from 'fs'
 import rules from './rules/index'
 import { readFile } from './utils/scriptUtils'
 import * as vscode from 'vscode'
+const jsdom = require("jsdom")
+const { JSDOM } = jsdom;
+const dom = new JSDOM('<!DOCUMENT html><p>Test</p>')
+global.window = dom.window
+global.document = window.document
 
 const transform = function (fileInfo: any, api: any, options: any) {
-	const sourceCode = fileInfo.source;
-	const $ = api.gogocode;
-	const ast = $(sourceCode, { parseOptions: { language: 'vue' } });
-	const outAst = rules.reduce((ast: any, rule: any) => rule(ast, api, options), ast);
-	return outAst.generate();
+    const sourceCode = fileInfo.source;
+    const ast = $(sourceCode, { parseOptions: { language: 'vue' } });
+    const outAst = rules.reduce((ast: any, rule: any) => rule(ast, api, options), ast);
+    return outAst.generate();
 }
 
  const run = (originPath: string) => new Promise((resolve, reject) => {
@@ -42,6 +40,7 @@ const transform = function (fileInfo: any, api: any, options: any) {
 				outRootPath: __dirname,
 			}
 		);
+    // console.log(1111, outputPath, outputCode)
 		fs.writeFile(outputPath, outputCode, (err: any) => {
 			if (err) {
 				reject(err)

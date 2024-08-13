@@ -1,5 +1,4 @@
 
-import $ from 'gogocode'
 export default function (ast: any) {
   try {
     ast.node.styles[0].attrs.lang = 'scss'
@@ -10,7 +9,7 @@ export default function (ast: any) {
     // console.log(111, content)
     // ast.node.styles[0].content = content
   } catch (error) {
-    console.log(error)
+    console.log('styles', error)
   }
 
   return ast.root()
